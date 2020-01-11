@@ -1,0 +1,34 @@
+div.join-private-room
+  form.join-private-room__modal
+    label.join-private-room__submit(for="userName")
+      | ユーザー名: 
+      input(type="text", name="", value="").input-box__username
+    label.join-private-room__submit(for="roomId")
+      | RoomID: 
+      input(type="text", name="", value="").input-box__room-id
+    button(type="submit").join-private-room__button
+      | 入室する
+  include loading
+block scripts
+  script(type='text/javascript').
+    $(function(){
+      let socket = io.connect();
+      $('.join-private-room__button').click(() => {
+        let data = {
+          username: $('.input-box__username').val(),
+          roomID: $('.input-box__room-id').val()
+        }
+        socket.json.emit('joinPrivateRoom', data);
+      });
+
+      socket.on('loading', (msg) => {
+        $('.loading-disp').show();
+      });
+      
+      socket.on('setMessage', (data) => {
+        console.log(data);
+        setTimeout(() => {
+          location.href = "/battle";
+        },1000);
+      });
+    })

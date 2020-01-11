@@ -3,8 +3,24 @@ extends layout
 block content
   h1 Gobblet Gobblers
   p Welcome to Gobblers
-  ul
-    li
-      a(href="/battle") オンライン対戦
-    li
-      a(href="#") プライベートマッチ
+  div.menu
+    ul.menu__item-list
+      li.menu__item
+        a(href="/battle") オンライン対戦
+      li.menu__item
+        div.modal
+          include layouts/modal/join_private_room
+        a(href="#").js-privateRoom プライベートマッチ
+      
+  block scripts
+    script(type='text/javascript').
+      $(function(){
+        let socket = io();
+        $('.js-privateRoom').click(() => {
+          //socket.emit('joinPrivateRoom', null);
+          $('.modal').fadeIn("slow")
+        });
+      });
+
+
+    
