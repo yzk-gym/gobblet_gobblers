@@ -21,7 +21,42 @@ app.set('port', port);
 
 var server = http.createServer(app);
 var io = require('socket.io')(server);
-io.on('connection', function(socket){
+let room = require('../sockets/room.js');
+let rooms = {};
+
+io.sockets.on('connection', (socket) => {
+
+  let roomId = '';
+  console.log('接続');
+
+  // プライベートマッチ
+  socket.on('joinPrivateRoom', (data) => {
+
+    if (rooms[data.roomId] === undefined) {
+      rooms[data.roomId] = room();
+      socket.join(data.roomId);
+      rooms[data.roomId].join(data.usernname);
+      socket.emit('loading', '処理中...');
+    } else if (rooms[data.roomId].member().length >= 2) {
+      console.log('3にん以上');
+    } else {
+      rooms[data.roomId].join(data.usernname);
+      console.log('二人目が入室しました');
+      socket.join(data.roomId);
+      if (rooms[data.roomId].isStartGame()) {
+        socket.emit('setMessage', '対戦相手が見つかりました');
+        socket.to(data.roomId).emit('setMessage', '対戦相手が見つかりました');
+      };
+    };
+  });
+
+  socket.on('emitClientToServer', (data) => {
+    io.to(data.roomId).emit('ReceiveServerToClient', { value: data.value });
+  });
+
+  socket.on('disconnect', () => {
+    //io.to(data.roomId).emit('ReceiveServerToClient', { value: '通信が切断されました' });
+  });
 });
 
 /**
